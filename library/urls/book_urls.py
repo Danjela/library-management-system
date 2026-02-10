@@ -26,7 +26,7 @@ urlpatterns = [
     # ======================
 
     path(
-        "public/books/<int:book_id>/",
+        "public/books/<int:id>/",
         MemberBookDetailAPI.as_view(),
         name="member-book-detail",
     ),
@@ -42,13 +42,13 @@ urlpatterns = [
     ),
 
     path(
-        "librarian/books/<int:book_id>/",
+        "librarian/books/<int:id>/",
         LibrarianBookDetailAPI.as_view(),
         name="librarian-book-detail",
     ),
 
     path(
-        "librarian/books/<int:book_id>/update/",
+        "librarian/books/<int:id>/update/",
         BookUpdateAPI.as_view(),
         name="librarian-book-update",
     ),

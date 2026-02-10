@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from library.models.borrow_models import Member
 
 @transaction.atomic
 def register_member(*, data):
@@ -16,5 +17,11 @@ def register_member(*, data):
     )
 
     user.groups.add(Group.objects.get(name="MEMBER"))
+
+    Member.objects.create(
+        user=user,
+        is_active=True,
+        membership_number=f"MEM-{Member.objects.count() + 1:05d}"
+    )
 
     return user

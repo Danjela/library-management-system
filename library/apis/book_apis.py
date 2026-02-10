@@ -1,9 +1,14 @@
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from library.serializers.book_serializers import AvailableBookSerializer, BookCreateSerializer, BookUpdateSerializer, MemberBookDetailSerializer, LibrarianBookDetailSerializer
+
+from library.serializers.book_serializers import (
+    AvailableBookSerializer, BookCreateSerializer, BookUpdateSerializer,
+    MemberBookDetailSerializer, LibrarianBookDetailSerializer
+)
 from library.services.book_factory import create_book_with_copies
 from library.services.book_queries import get_available_books
 from library.services.book_updater import update_book_with_copies
@@ -12,54 +17,40 @@ from library.models.book_models import Book
 from django.shortcuts import get_object_or_404
 from users.permissions.roles import IsMember, IsLibrarian
 
-class BookCreateAPI(APIView):
+class BookCreateAPI(CreateAPIView):
+    serializer_class = BookCreateSerializer
     permission_classes = [IsAuthenticated, IsLibrarian]
 
-    def post(self, request):
-        serializer = BookCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def perform_create(self, serializer):
+        create_book_with_copies(**serializer.validated_data)
 
-        book = create_book_with_copies(**serializer.validated_data)
-
-        return Response({"id": book.id}, status=201)
-    
-class BookUpdateAPI(APIView):
+class BookUpdateAPI(UpdateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookUpdateSerializer
     permission_classes = [IsAuthenticated, IsLibrarian]
+    lookup_field = 'id'
 
-    def put(self, request, book_id):
-        book = get_object_or_404(Book, id=book_id)
-
-        serializer = BookUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
+    def perform_update(self, serializer):
         update_book_with_copies(
-            book=book,
+            book=serializer.instance,
             data=serializer.validated_data
         )
 
-        return Response(status=204)
-    
-class LibrarianBookDetailAPI(APIView):
+class LibrarianBookDetailAPI(RetrieveAPIView):
+    queryset = Book.objects.prefetch_related("authors", "copies")
+    serializer_class = LibrarianBookDetailSerializer
     permission_classes = [IsAuthenticated, IsLibrarian]
+    lookup_field = 'id'
 
-    def get(self, request, book_id):
-        book = get_object_or_404(
-            Book.objects.prefetch_related("authors", "copies"),
-            id=book_id
-        )
-        serializer = LibrarianBookDetailSerializer(book)
-        return Response(serializer.data)
-
-class MemberBookDetailAPI(APIView):
+class MemberBookDetailAPI(RetrieveAPIView):
+    serializer_class = MemberBookDetailSerializer
     permission_classes = [IsAuthenticated, IsMember]
+    lookup_field = 'id'
 
-    def get(self, request, book_id):
-        book = get_object_or_404(
-            Book.objects.filter(is_deleted=False).prefetch_related("authors"),
-            id=book_id
-        )
-        serializer = MemberBookDetailSerializer(book)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Book.objects.filter(
+            is_deleted=False
+        ).prefetch_related("authors")
 
 class BookSoftDeleteAPI(APIView):
     permission_classes = [IsAuthenticated, IsLibrarian]
@@ -69,7 +60,6 @@ class BookSoftDeleteAPI(APIView):
         soft_delete_book(book=book)
         return Response(status=204)
 
-    
 class AvailableBooksAPI(ListAPIView):
     serializer_class = AvailableBookSerializer
     pagination_class = PageNumberPagination

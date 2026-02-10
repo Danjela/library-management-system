@@ -66,6 +66,9 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 10,
 }
 
+LIBRARY_MAX_BOOKS_ALLOWED = 5
+LIBRARY_LOAN_DAYS = 14
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),

@@ -11,7 +11,6 @@ class Member(models.Model):
     membership_number = models.CharField(max_length=20, unique=True)
     joined_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
-    max_books_allowed = models.PositiveIntegerField(default=5)
 
 class Loan(models.Model):
     class Status(models.TextChoices):
