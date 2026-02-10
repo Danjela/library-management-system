@@ -1,3 +1,4 @@
+import logging
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from library.models.book_models import Book, Author, BookCopy
@@ -52,6 +53,12 @@ def update_book_with_copies(*, book: Book, data: dict):
     )
 
     if protected.exists():
+        logging.error({
+            "event": "book_update_failed",
+            "reason": "active_copies_on_update",
+            "book_id": book.id,
+            "protected_copies_count": protected.count(),
+        })
         raise ValidationError(
             "Cannot delete borrowed or reserved copies"
         )
