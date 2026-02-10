@@ -74,6 +74,7 @@ class AvailableBookSerializer(serializers.ModelSerializer):
             "title",
             "authors",
             "category",
+            "description",
             "published_year",
             "available_copies",
         ]

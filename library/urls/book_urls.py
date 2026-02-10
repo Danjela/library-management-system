@@ -1,6 +1,6 @@
 from django.urls import path
 
-from library.apis import (
+from library.apis.book_apis import (
     BookCreateAPI,
     BookUpdateAPI,
     LibrarianBookDetailAPI,

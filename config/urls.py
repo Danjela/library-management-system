@@ -25,5 +25,6 @@ urlpatterns = [
     path("auth/login/", LoginAPI.as_view()),
     path("auth/refresh/", TokenRefreshView.as_view()),
     path("auth/logout/", LogoutAPI.as_view()),
-    path("api/", include("library.book_urls")),
+    path("api/", include("library.urls.book_urls")),
+    path("api/", include("library.urls.borrow_urls"))
 ]

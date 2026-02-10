@@ -1,8 +1,6 @@
 from library.models.book_models import Book, Author, BookCopy
 from django.db import transaction
 
-from library.services.book_queries import get_available_books
-
 
 @transaction.atomic
 def create_book_with_copies(
