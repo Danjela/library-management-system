@@ -47,7 +47,7 @@ class ReturnBookAPI(APIView):
         serializer.is_valid(raise_exception=True)
 
         member = Member.objects.get(user=request.user)
-        loan = Loan.objects.get(id=serializer.validated_data["loan_id"], member=member)
+        loan = get_object_or_404(Loan, id=serializer.validated_data["loan_id"], member=member)
 
         self.check_object_permissions(request, loan)
 
@@ -94,12 +94,20 @@ class CancelReservationAPI(APIView):
     permission_classes = [IsAuthenticated, IsReservationOwner]
 
     def post(self, request):
+        self.check_permissions(request)
+        
         reservation = get_object_or_404(
             Reservation,
             id=request.data["reservation_id"]
         )
 
         self.check_object_permissions(request, reservation)
+
+        if reservation.status != Reservation.Status.ACTIVE:
+            return Response(
+                {"error": f"Cannot cancel a {reservation.status.lower()} reservation"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         reservation.status = Reservation.Status.CANCELLED
         reservation.save()

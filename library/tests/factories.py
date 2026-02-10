@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User, Group
 from library.models.book_models import Author, Book, BookCopy
+from library.models.borrow_models import Member
 
 
 def create_user(*, is_librarian=False):
@@ -11,6 +12,14 @@ def create_user(*, is_librarian=False):
     group_name = "LIBRARIAN" if is_librarian else "MEMBER"
     group, _ = Group.objects.get_or_create(name=group_name)
     user.groups.add(group)
+
+    # Create Member object for non-librarian users
+    if not is_librarian:
+        Member.objects.create(
+            user=user,
+            is_active=True,
+            membership_number=f"MEM-{Member.objects.count() + 1:05d}"
+        )
 
     return user
 

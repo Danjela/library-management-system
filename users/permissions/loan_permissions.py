@@ -9,4 +9,4 @@ class IsBorrowerOrLibrarian(BasePermission):
         if user.groups.filter(name="LIBRARIAN").exists():
             return True
         
-        return loan.member == request.user
+        return loan.member.user == request.user

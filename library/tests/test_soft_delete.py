@@ -9,10 +9,7 @@ class BookSoftDeleteTests(APITestCase):
 
     def setUp(self):
         self.librarian = create_user(is_librarian=True)
-        self.client.login(
-            username=self.librarian.username,
-            password="password123"
-        )
+        self.client.force_authenticate(user=self.librarian)
 
     def test_soft_delete_book(self):
         book = create_book()

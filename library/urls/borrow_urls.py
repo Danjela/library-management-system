@@ -31,7 +31,7 @@ urlpatterns = [
         name="book-reserve"
     ),
     path(
-        "books/reservations/cancel/",
+        "books/cancel-reservation/",
         CancelReservationAPI.as_view(),
         name="reservation-cancel"
     ),

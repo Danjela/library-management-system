@@ -1,7 +1,8 @@
 import logging
 from django.db import transaction
 from django.db.models import Q
-from datetime import timedelta, timezone
+from datetime import timedelta
+from django.utils import timezone
 
 from library.models.book_models import BookCopy
 from library.models.borrow_models import Loan, Fine, Reservation

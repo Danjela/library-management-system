@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from library.serializers.book_serializers import AvailableBookSerializer, BookCreateSerializer, BookUpdateSerializer, MemberBookDetailSerializer, LibrarianBookDetailSerializer
 from library.services.book_factory import create_book_with_copies
 from library.services.book_queries import get_available_books
@@ -71,6 +72,7 @@ class BookSoftDeleteAPI(APIView):
     
 class AvailableBooksAPI(ListAPIView):
     serializer_class = AvailableBookSerializer
+    pagination_class = PageNumberPagination
     ordering_fields = ["title", "published_year"]
 
     def get_queryset(self):

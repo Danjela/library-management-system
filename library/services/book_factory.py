@@ -10,7 +10,7 @@ def create_book_with_copies(
     category,
     description,
     published_year,
-    author_names,
+    authors,
     copies
 ):
     book = Book.objects.create(
@@ -21,12 +21,12 @@ def create_book_with_copies(
         published_year=published_year,
     )
 
-    authors = []
-    for name in author_names:
+    author_objects = []
+    for name in authors:
         author, _ = Author.objects.get_or_create(name=name)
-        authors.append(author)
+        author_objects.append(author)
 
-    book.authors.set(authors)
+    book.authors.set(author_objects)
 
     BookCopy.objects.bulk_create([
         BookCopy(

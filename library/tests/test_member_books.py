@@ -9,7 +9,7 @@ class MemberBookListTests(APITestCase):
 
     def setUp(self):
         self.user = create_user()
-        self.client.login(username=self.user.username, password="password123")
+        self.client.force_authenticate(user=self.user)
 
         create_book(title="Django Basics", copies=2)
         create_book(
@@ -41,7 +41,7 @@ class MemberBookDetailTests(APITestCase):
 
     def setUp(self):
         self.user = create_user()
-        self.client.login(username=self.user.username, password="password123")
+        self.client.force_authenticate(user=self.user)
         self.book = create_book()
 
     def test_member_does_not_see_copies(self):
