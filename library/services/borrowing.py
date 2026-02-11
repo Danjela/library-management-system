@@ -7,6 +7,7 @@ from django.conf import settings
 
 from library.models.book_models import BookCopy
 from library.models.borrow_models import Loan, Reservation
+from library.logging import ServiceLogger
 
 from library.repositories.book_copy_repository import BookCopyRepository
 from library.repositories.loan_repository import LoanRepository
@@ -25,7 +26,7 @@ from library.services.specifications.reservation_specifications import (
 class BorrowingError(Exception):
     pass
 
-logger = logging.getLogger("domain")
+logger = ServiceLogger("borrowing")
 
 @transaction.atomic
 def borrow_book(member, book):
@@ -44,22 +45,22 @@ def borrow_book(member, book):
     for spec in specs:
         ok = spec.is_satisfied_by(member, book=book)
         if not ok:
-            logger.warning({
-                "event": "borrow_rejected",
-                "reason": getattr(spec, "error_message", "validation_failed"),
-                "book_id": getattr(book, "id", None),
-                "member_id": getattr(member, "id", None),
-            })
-            raise BorrowingError(getattr(spec, "error_message", "Validation failed"))
+            error_msg = getattr(spec, "error_message", "Validation failed")
+            logger.business_rule_rejected(
+                error_msg,
+                book_id=getattr(book, "id", None),
+                member_id=getattr(member, "id", None),
+            )
+            raise BorrowingError(error_msg)
 
     copy = book_copy_repo.find_available_for_book(book)
     if not copy:
-        logger.warning({
-            "event": "borrow_rejected",
-            "reason": "no_available_copies",
-            "book_id": getattr(book, "id", None),
-            "member_id": getattr(member, "id", None),
-        })
+        logger.operation_failed(
+            "borrow",
+            reason="no_available_copies",
+            book_id=getattr(book, "id", None),
+            member_id=getattr(member, "id", None),
+        )
         raise BorrowingError("No available copies")
 
     loan_days = getattr(settings, "LIBRARY_LOAN_DAYS", 14)
@@ -77,5 +78,12 @@ def borrow_book(member, book):
         first_reservation.fulfilled = True
         first_reservation.status = Reservation.Status.FULFILLED
         first_reservation.save()
+
+    logger.operation_succeeded(
+        "borrow",
+        loan_id=loan.id,
+        book_id=book.id,
+        member_id=member.id,
+    )
 
     return loan

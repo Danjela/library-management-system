@@ -16,16 +16,16 @@ class BookCreateSerializer(serializers.Serializer):
 
 class BookCopyUpdateSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=False)
-    barcode = serializers.CharField(max_length=50)
-    shelf_location = serializers.CharField(max_length=50)
+    barcode = serializers.CharField(max_length=50, required=False)
+    shelf_location = serializers.CharField(max_length=50, required=False)
 
 class BookUpdateSerializer(serializers.Serializer):
-    title = serializers.CharField()
-    category = serializers.CharField()
-    description = serializers.CharField()
-    published_year = serializers.IntegerField()
-    authors = serializers.ListField(child=serializers.CharField())
-    copies = BookCopyUpdateSerializer(many=True)
+    title = serializers.CharField(required=False)
+    category = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    published_year = serializers.IntegerField(required=False)
+    authors = serializers.ListField(child=serializers.CharField(), required=False)
+    copies = BookCopyUpdateSerializer(many=True, required=False)
 
 class BookCopyDetailSerializer(serializers.ModelSerializer):
     class Meta:

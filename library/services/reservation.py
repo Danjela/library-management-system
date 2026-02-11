@@ -3,6 +3,9 @@ from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 
 from library.models.borrow_models import BookCopy, Reservation
+from library.logging import ServiceLogger
+
+logger = ServiceLogger("reservation")
 
 
 @transaction.atomic

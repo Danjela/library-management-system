@@ -36,6 +36,15 @@ class BookUpdateAPI(UpdateAPIView):
             data=serializer.validated_data
         )
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        detail_serializer = LibrarianBookDetailSerializer(self.get_object(), context={"request": request})
+        return Response(detail_serializer.data)
+
 class LibrarianBookDetailAPI(RetrieveAPIView):
     queryset = Book.objects.prefetch_related("authors", "copies")
     serializer_class = LibrarianBookDetailSerializer

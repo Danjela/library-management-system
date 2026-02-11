@@ -2,11 +2,12 @@ import logging
 from django.utils import timezone
 from django.db import transaction
 from library.models.borrow_models import BookCopy, Loan, Fine, Reservation
+from library.logging import ServiceLogger
 
 # currency units per day consider moving to settings
 DAILY_FINE_RATE = 1.50
 
-logger = logging.getLogger("domain")
+logger = ServiceLogger("returning")
 
 def calculate_fine(loan: Loan) -> float:
     if loan.returned_at <= loan.due_at:
@@ -19,13 +20,13 @@ def calculate_fine(loan: Loan) -> float:
 @transaction.atomic
 def return_book(loan : Loan) -> float:
     if loan.status != Loan.Status.ACTIVE:
-        logger.error({
-            "event": "return_failed",
-            "reason": "loan_not_active",
-            "loan_id": loan.id,
-            "member_id": loan.member.id,
-            "book_copy_id": loan.book_copy.id,
-        })
+        logger.operation_failed(
+            "return",
+            reason="loan_not_active",
+            loan_id=loan.id,
+            member_id=loan.member.id,
+            book_copy_id=loan.book_copy.id,
+        )
         raise ValueError("Loan already closed")
     
     loan.returned_at = timezone.now()
@@ -37,13 +38,13 @@ def return_book(loan : Loan) -> float:
             loan=loan,
             amount=fine_amount
         )
-        logger.error({
-            "event": "book_returned_with_fine",
-            "loan_id": loan.id,
-            "member_id": loan.member.id,
-            "book_copy_id": loan.book_copy.id,
-            "fine_amount": fine_amount,
-        })
+        logger.operation_succeeded(
+            "return",
+            loan_id=loan.id,
+            member_id=loan.member.id,
+            book_copy_id=loan.book_copy.id,
+            fine_amount=fine_amount,
+        )
     else:
         loan.status = Loan.Status.RETURNED
 

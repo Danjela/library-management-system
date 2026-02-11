@@ -148,14 +148,20 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "json": {
-            "format": "%(message)s",
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {name} {message}",
+            "style": "{",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "json",
+            "formatter": "simple",
+            "level": "DEBUG",
         },
     },
     "loggers": {
@@ -166,9 +172,28 @@ LOGGING = {
         },
         "domain": {
             "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "borrowing": {
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
+        "returning": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "reservation": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
     },
 }
 
